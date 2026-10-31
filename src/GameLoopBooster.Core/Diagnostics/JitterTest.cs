@@ -49,14 +49,24 @@ public static class JitterTest
 {
     private const int BaselineSamples = 300;
 
-    public static Task<JitterResult> RunAsync(TimeSpan duration, IProgress<JitterBatch>? live, CancellationToken ct) =>
-        Task.Factory.StartNew(() => Run(duration, live, ct), ct, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+    /// <param name="realtime">
+    /// Runs the probe thread in the realtime priority class so that no ordinary thread (including the game,
+    /// which this app raises to High) can delay it. What is left is time stolen by drivers (DPC/ISR) and
+    /// firmware. With <c>false</c> the probe runs at a normal high priority and also shows how long ordinary
+    /// threads wait for a CPU while the game is busy.
+    /// </param>
+    public static Task<JitterResult> RunAsync(TimeSpan duration, bool realtime, IProgress<JitterBatch>? live, CancellationToken ct) =>
+        Task.Factory.StartNew(() => Run(duration, realtime, live, ct), ct, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
-    private static JitterResult Run(TimeSpan duration, IProgress<JitterBatch>? live, CancellationToken ct)
+    private static JitterResult Run(TimeSpan duration, bool realtime, IProgress<JitterBatch>? live, CancellationToken ct)
     {
         const double periodMs = 1.0;
         var thread = Thread.CurrentThread;
         var oldPriority = thread.Priority;
+        using var process = Process.GetCurrentProcess();
+        var oldClass = process.PriorityClass;
+        // The probe sleeps almost all the time, so a realtime class for the length of the test is harmless.
+        if (realtime) process.PriorityClass = ProcessPriorityClass.RealTime;
         thread.Priority = ThreadPriority.Highest;
 
         var timer = NativeMethods.CreateWaitableTimerExW(IntPtr.Zero, null,
@@ -94,6 +104,7 @@ public static class JitterTest
         {
             NativeMethods.CloseHandle(timer);
             thread.Priority = oldPriority;
+            if (realtime) process.PriorityClass = oldClass;
         }
 
         var seconds = sw.Elapsed.TotalSeconds;
