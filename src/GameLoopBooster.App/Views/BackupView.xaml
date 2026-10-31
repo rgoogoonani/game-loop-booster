@@ -1,0 +1,80 @@
+<UserControl x:Class="GameLoopBooster.App.Views.BackupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,8,28,28">
+        <StackPanel>
+            <TextBlock Text="بکاپ و بازگردانی" Style="{StaticResource H1}" />
+            <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,16"
+                       Text="قبل از اولین تغییر هر تنظیم، مقدار اصلی ویندوز ذخیره می‌شود و دیگر بازنویسی نمی‌شود؛ پس «بازگردانی» همیشه یعنی حالت قبل از این برنامه. یک نسخه .reg از هر کلید رجیستری هم کنار بکاپ ذخیره می‌شود که بدون این برنامه هم قابل استفاده است." />
+
+            <UniformGrid Columns="3" Margin="-6,0,-6,0">
+                <Border Style="{StaticResource Card}" Margin="6">
+                    <StackPanel>
+                        <TextBlock Text="&#xE777;" FontFamily="Segoe MDL2 Assets" FontSize="22" Foreground="{StaticResource DangerBrush}" />
+                        <TextBlock Text="بازگردانی کامل" Style="{StaticResource H2}" Margin="0,10,0,4" />
+                        <TextBlock Text="همه تنظیمات تغییر یافته (رجیستری، پاورپلن، حافظه، bcdedit) به حالت اولیه برمی‌گردند." Style="{StaticResource Muted}" Height="42" />
+                        <Button Style="{StaticResource DangerButton}" Content="بازگردانی همه به حالت اولیه" Command="{Binding RestoreAllCommand}" Margin="0,12,0,0" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Margin="6">
+                    <StackPanel>
+                        <TextBlock Text="&#xE81C;" FontFamily="Segoe MDL2 Assets" FontSize="22" Foreground="{StaticResource AccentBrush}" />
+                        <TextBlock Text="System Restore Point" Style="{StaticResource H2}" Margin="0,10,0,4" HorizontalAlignment="Left" FlowDirection="LeftToRight" />
+                        <TextBlock Text="لایه حفاظتی اضافه: نقطه بازگردانی خود ویندوز (پیشنهاد می‌شود قبل از اولین بوست بسازید)." Style="{StaticResource Muted}" Height="42" />
+                        <Button Content="ساخت نقطه بازگردانی" Command="{Binding CreateRestorePointCommand}" Margin="0,12,0,0" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Margin="6">
+                    <StackPanel>
+                        <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="22" Foreground="{StaticResource Accent2Brush}" />
+                        <TextBlock Text="فایل‌های بکاپ" Style="{StaticResource H2}" Margin="0,10,0,4" />
+                        <TextBlock Text="backup.json، خروجی‌های .reg، تنظیمات و فایل گزارش در ProgramData\GameLoopBooster" Style="{StaticResource Muted}" Height="42" />
+                        <Button Content="باز کردن پوشه" Command="{Binding OpenDataFolderCommand}" Margin="0,12,0,0" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <Border Style="{StaticResource Card}" Margin="0,8,0,0">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource H2}">
+                        <Run Text="مقادیر اولیه ذخیره‌شده" /><Run Text=" (" /><Run Text="{Binding BackupRows.Count, Mode=OneWay}" /><Run Text=")" />
+                    </TextBlock>
+                    <TextBlock Text="هنوز هیچ تنظیمی تغییر نکرده است." Style="{StaticResource Muted}" Margin="0,10,0,0"
+                               Visibility="{Binding BackupRows.Count, Converter={StaticResource InvBoolVis}}" />
+                    <DataGrid ItemsSource="{Binding BackupRows}" IsReadOnly="True" Margin="0,10,0,0" MaxHeight="360"
+                              Visibility="{Binding BackupRows.Count, Converter={StaticResource BoolVis}}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="تنظیم" Binding="{Binding Title}" Width="3*" />
+                            <DataGridTextColumn Header="نوع" Binding="{Binding Kind}" Width="*" />
+                            <DataGridTextColumn Header="مقدار اولیه" Binding="{Binding Original}" Width="2*" />
+                            <DataGridTextColumn Header="زمان ذخیره" Binding="{Binding Captured}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,14,0,0">
+                <StackPanel>
+                    <TextBlock Text="گزارش رویدادها" Style="{StaticResource H2}" />
+                    <ItemsControl ItemsSource="{Binding Logs}" Margin="0,10,0,0" MaxHeight="320">
+                        <ItemsControl.Template>
+                            <ControlTemplate TargetType="ItemsControl">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <ItemsPresenter />
+                                </ScrollViewer>
+                            </ControlTemplate>
+                        </ItemsControl.Template>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel Margin="0,3">
+                                    <TextBlock DockPanel.Dock="Left" Text="{Binding TimeText}" Style="{StaticResource Mono}" Foreground="{StaticResource MutedBrush}" Margin="0,0,12,0" />
+                                    <TextBlock Text="{Binding Message}" Foreground="{Binding Level, Converter={StaticResource StateBrush}}" TextWrapping="Wrap" FontSize="12.5" />
+                                </DockPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

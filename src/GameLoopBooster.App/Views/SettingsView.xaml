@@ -1,0 +1,50 @@
+<UserControl x:Class="GameLoopBooster.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,8,28,28">
+        <StackPanel>
+            <TextBlock Text="تنظیمات" Style="{StaticResource H1}" Margin="0,0,0,16" />
+
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="عمومی" Style="{StaticResource H2}" Margin="0,0,0,14" />
+                    <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding StartWithWindows}" Margin="0,0,0,12">
+                        <TextBlock Text="اجرا همراه ویندوز (با دسترسی ادمین، بدون پیام UAC)" />
+                    </CheckBox>
+                    <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding StartMinimized}" Margin="0,0,0,12">
+                        <TextBlock Text="شروع به‌صورت مخفی در کنار ساعت ویندوز" />
+                    </CheckBox>
+                    <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding MinimizeToTray}" Margin="0,0,0,12">
+                        <TextBlock Text="با بستن پنجره، برنامه در کنار ساعت ویندوز به کار ادامه دهد" />
+                    </CheckBox>
+                    <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding AdvancedMode}">
+                        <TextBlock Text="حالت پیشرفته (ویرایش دستی مقادیر و نمایش تنظیمات متخصص)" />
+                    </CheckBox>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,14,0,0">
+                <StackPanel>
+                    <TextBlock Text="GameLoop" Style="{StaticResource H2}" Margin="0,0,0,8" />
+                    <TextBlock Text="مسیر نصب برای تنظیمات GPU Preference و Fullscreen Optimizations لازم است. معمولاً خودکار پیدا می‌شود." Style="{StaticResource Muted}" />
+                    <DockPanel Margin="0,12,0,0">
+                        <Button DockPanel.Dock="Right" Content="انتخاب پوشه…" Command="{Binding BrowseGameLoopCommand}" Margin="10,0,0,0" />
+                        <Border Background="{StaticResource Surface2Brush}" CornerRadius="8" Padding="10,8">
+                            <TextBlock Text="{Binding GameLoopText}" Style="{StaticResource Mono}" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis" />
+                        </Border>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,14,0,0">
+                <StackPanel>
+                    <TextBlock Text="ایمنی و حدود برنامه" Style="{StaticResource H2}" Margin="0,0,0,8" />
+                    <TextBlock Style="{StaticResource Muted}" Text="• این برنامه هیچ فایلی از GameLoop یا PUBG را تغییر نمی‌دهد، به پردازه‌ها کد تزریق نمی‌کند و حافظه آن‌ها را نمی‌خواند. فقط تنظیمات خود ویندوز (رجیستری، پاورپلن، تایمر) و Affinity/Priority را مثل Task Manager تغییر می‌دهد." />
+                    <TextBlock Style="{StaticResource Muted}" Margin="0,6,0,0" Text="• اگر آنتی‌چیت دسترسی به پردازه‌ای را ببندد، برنامه آن را رد می‌کند و در صفحه پردازه‌ها نمایش می‌دهد؛ تلاشی برای دور زدن انجام نمی‌شود." />
+                    <TextBlock Style="{StaticResource Muted}" Margin="0,6,0,0" Text="• هر تغییر قابل برگشت است. برای اثر کامل برخی تنظیمات ری‌استارت لازم است." />
+                    <TextBlock Style="{StaticResource Label}" Margin="0,14,0,0" Text="GameLoop Booster 1.0 · فونت Vazirmatn (OFL)" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

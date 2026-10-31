@@ -1,0 +1,151 @@
+<UserControl x:Class="GameLoopBooster.App.Views.DiagnosticsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:GameLoopBooster.App.Controls"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,8,28,28">
+        <StackPanel>
+            <TextBlock Text="عیب‌یابی و تست" Style="{StaticResource H1}" />
+            <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,16"
+                       Text="میکرو‌استاتر معمولاً از مکث‌های کوتاه سیستم (DPC/ISR درایورها، بیدار شدن هسته‌های پارک‌شده، تغییر حالت پاور) می‌آید، نه از کمبود FPS. این تست همین مکث‌ها را اندازه می‌گیرد." />
+
+            <!-- Jitter -->
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="مدت:" Style="{StaticResource Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <ComboBox Width="90" SelectedItem="{Binding JitterSeconds}" IsEnabled="{Binding IsJitterRunning, Converter={StaticResource InvBool}}" FlowDirection="LeftToRight">
+                                <ComboBox.ItemsSource>
+                                    <x:Array Type="sys:Int32">
+                                        <sys:Int32>10</sys:Int32>
+                                        <sys:Int32>15</sys:Int32>
+                                        <sys:Int32>30</sys:Int32>
+                                        <sys:Int32>60</sys:Int32>
+                                    </x:Array>
+                                </ComboBox.ItemsSource>
+                            </ComboBox>
+                            <TextBlock Text="ثانیه" Style="{StaticResource Label}" VerticalAlignment="Center" Margin="8,0,16,0" />
+                            <Button Command="{Binding RunJitterCommand}" MinWidth="130">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+                                        <Setter Property="Content" Value="شروع تست" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsJitterRunning}" Value="True">
+                                                <Setter Property="Content" Value="توقف" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="تست Jitter زمان‌بندی (DPC / Latency)" Style="{StaticResource H2}" />
+                            <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,0"
+                                       Text="یک ترد با اولویت بالا هر 1ms بیدار می‌شود و تأخیر هر بیداری ثبت می‌شود. یک بار قبل و یک بار بعد از بهینه‌سازی (و ری‌استارت) اجرا کنید. اجرای تست وقتی GameLoop باز است نتیجه واقعی‌تری می‌دهد." />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <Border Margin="0,16,0,0" Height="200" CornerRadius="12" Background="{StaticResource Surface2Brush}" Padding="10" FlowDirection="LeftToRight">
+                        <c:JitterChart Values="{Binding JitterValues}" />
+                    </Border>
+                    <Border Height="4" CornerRadius="2" Background="{StaticResource Surface3Brush}" Margin="0,8,0,0" FlowDirection="LeftToRight">
+                        <ProgressBar Value="{Binding JitterProgress}" Maximum="100" Height="4" BorderThickness="0"
+                                     Background="Transparent" Foreground="{StaticResource AccentGradient}" />
+                    </Border>
+
+                    <UniformGrid Columns="5" Margin="-6,14,-6,0" Visibility="{Binding JitterResult, Converter={StaticResource BoolVis}}">
+                        <Border Background="{StaticResource Surface2Brush}" CornerRadius="12" Padding="14" Margin="6">
+                            <StackPanel>
+                                <TextBlock Text="میانگین تأخیر" Style="{StaticResource Label}" />
+                                <TextBlock Text="{Binding JitterResult.AvgMs, StringFormat={}{0:0.000} ms}" FontSize="18" FontWeight="Bold" Margin="0,6,0,0" FlowDirection="LeftToRight" HorizontalAlignment="Right" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{StaticResource Surface2Brush}" CornerRadius="12" Padding="14" Margin="6">
+                            <StackPanel>
+                                <TextBlock Text="صدک ۹۹ (p99)" Style="{StaticResource Label}" />
+                                <TextBlock Text="{Binding JitterResult.P99Ms, StringFormat={}{0:0.000} ms}" FontSize="18" FontWeight="Bold" Margin="0,6,0,0" FlowDirection="LeftToRight" HorizontalAlignment="Right" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{StaticResource Surface2Brush}" CornerRadius="12" Padding="14" Margin="6">
+                            <StackPanel>
+                                <TextBlock Text="بدترین مکث" Style="{StaticResource Label}" />
+                                <TextBlock Text="{Binding JitterResult.MaxMs, StringFormat={}{0:0.000} ms}" FontSize="18" FontWeight="Bold" Margin="0,6,0,0" Foreground="{StaticResource WarningBrush}" FlowDirection="LeftToRight" HorizontalAlignment="Right" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{StaticResource Surface2Brush}" CornerRadius="12" Padding="14" Margin="6">
+                            <StackPanel>
+                                <TextBlock Text="پرش‌های بالای 0.5ms / 1ms" Style="{StaticResource Label}" />
+                                <TextBlock FontSize="18" FontWeight="Bold" Margin="0,6,0,0" FlowDirection="LeftToRight" HorizontalAlignment="Right">
+                                    <Run Text="{Binding JitterResult.SpikesOver500us, Mode=OneWay}" /><Run Text=" / " Foreground="{StaticResource MutedBrush}" /><Run Text="{Binding JitterResult.SpikesOver1ms, Mode=OneWay}" Foreground="{StaticResource DangerBrush}" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{StaticResource AccentSoftBrush}" CornerRadius="12" Padding="14" Margin="6">
+                            <StackPanel>
+                                <TextBlock Text="نتیجه" Style="{StaticResource Label}" />
+                                <TextBlock Text="{Binding JitterResult.Verdict}" FontSize="15" FontWeight="Bold" Margin="0,6,0,0" Foreground="{StaticResource AccentBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- Checks -->
+            <Border Style="{StaticResource Card}" Margin="0,14,0,0">
+                <StackPanel>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource SmallButton}" Content="بررسی دوباره" Command="{Binding RunChecksCommand}" />
+                        <TextBlock Text="بررسی سلامت سیستم" Style="{StaticResource H2}" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <ItemsControl ItemsSource="{Binding Checks}" Margin="0,10,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="220" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Ellipse Width="10" Height="10" Fill="{Binding State, Converter={StaticResource StateBrush}}" VerticalAlignment="Top" Margin="0,5,12,0" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Title}" FontWeight="SemiBold" />
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="{Binding Value}" Foreground="{Binding State, Converter={StaticResource StateBrush}}" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Advice}" Style="{StaticResource Muted}" Margin="0,4,0,0"
+                                                       Visibility="{Binding Advice, Converter={StaticResource BoolVis}}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- GameLoop guide -->
+            <Border Style="{StaticResource Card}" Margin="0,14,0,0">
+                <StackPanel>
+                    <TextBlock Text="تنظیمات پیشنهادی داخل خود GameLoop" Style="{StaticResource H2}" />
+                    <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,12" Text="این‌ها را از منوی تنظیمات GameLoop (Settings → Engine) دستی تغییر دهید؛ این برنامه به فایل‌های GameLoop دست نمی‌زند." />
+                    <ItemsControl>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="0,5">
+                                    <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource AccentBrush}" VerticalAlignment="Top" Margin="0,3,10,0" />
+                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" MaxWidth="900" LineHeight="21" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <sys:String>Rendering: DirectX+ را با OpenGL+ هم تست کنید؛ روی کارت‌های AMD گاهی OpenGL+ فریم‌تایم یکنواخت‌تری می‌دهد.</sys:String>
+                        <sys:String>Memory: 4096MB کافی است (بیشتر کردن کمکی به استاتر نمی‌کند). Processor: 4 هسته (موتور امولاتور بیشتر از این را خوب استفاده نمی‌کند).</sys:String>
+                        <sys:String>Resolution: همان رزولوشن مانیتور یا یک پله کمتر؛ Anti-aliasing را خاموش کنید (هزینه زیاد، فایده کم).</sys:String>
+                        <sys:String>Prioritize dedicated GPU را روشن کنید. Render cache / Render Optimization را روشن بگذارید.</sys:String>
+                        <sys:String>داخل پابجی: Frame Rate را روی بیشترین مقداری بگذارید که پایدار نگه می‌دارد (FPS ثابت بهتر از FPS بالا ولی نوسانی است).</sys:String>
+                        <sys:String>فقط یک مانیتور با رفرش‌ریت بالا روشن باشد یا هر دو مانیتور یک رفرش‌ریت داشته باشند؛ رفرش‌ریت متفاوت در حالت پنجره‌ای عامل رایج استاتر است.</sys:String>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

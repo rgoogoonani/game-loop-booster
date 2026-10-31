@@ -1,0 +1,147 @@
+<UserControl x:Class="GameLoopBooster.App.Views.ProcessesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Self">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,8,28,28">
+        <StackPanel>
+            <TextBlock Text="پردازه‌ها و هسته‌ها" Style="{StaticResource H1}" />
+            <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,16"
+                       Text="وقتی GameLoop اجرا شود، موتور امولاتور به هسته‌های سریع (P-Core / CCD اصلی) قفل می‌شود، اولویتش بالا می‌رود و از حالت کم‌مصرف EcoQoS خارج می‌شود. لانچر و سرویس‌ها به هسته‌های دیگر فرستاده می‌شوند. همه این کارها از بیرون و مثل Task Manager انجام می‌شود؛ هیچ فایلی از GameLoop تغییر نمی‌کند." />
+
+            <!-- Live -->
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding AutoOptimize}" Margin="0,0,14,0">
+                                <TextBlock Text="اعمال خودکار قوانین" />
+                            </CheckBox>
+                            <Button Style="{StaticResource PrimaryButton}" Command="{Binding OptimizeNowCommand}">
+                                <TextBlock Text="الان اعمال کن" Foreground="#06121A" FontWeight="Bold" />
+                            </Button>
+                        </StackPanel>
+                        <TextBlock Text="پردازه‌های در حال اجرا" Style="{StaticResource H2}" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <TextBlock Text="هنوز هیچ پردازه‌ای از GameLoop در حال اجرا نیست. GameLoop را باز کنید؛ تنظیمات خودکار اعمال می‌شوند."
+                               Style="{StaticResource Muted}" Margin="0,14,0,0"
+                               Visibility="{Binding LiveProcesses.Count, Converter={StaticResource InvBoolVis}}" />
+                    <DataGrid ItemsSource="{Binding LiveProcesses}" Margin="0,12,0,0" IsReadOnly="True"
+                              Visibility="{Binding LiveProcesses.Count, Converter={StaticResource BoolVis}}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="پردازه" Binding="{Binding Name}" Width="2*" />
+                            <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="80" />
+                            <DataGridTextColumn Header="Priority" Binding="{Binding Priority}" Width="*" />
+                            <DataGridTextColumn Header="هسته‌ها (Affinity)" Binding="{Binding Affinity}" Width="1.4*" />
+                            <DataGridTemplateColumn Header="وضعیت" Width="2*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Status}" Foreground="{Binding Optimized, Converter={StaticResource StateBrush}}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Status}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- Rules -->
+            <Border Style="{StaticResource Card}" Margin="0,14,0,0">
+                <StackPanel>
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Style="{StaticResource SmallButton}" Content="+ قانون جدید" Command="{Binding AddRuleCommand}" Margin="0,0,6,0" />
+                            <Button Style="{StaticResource SmallButton}" Content="پیش‌فرض" Command="{Binding ResetRulesCommand}" Margin="0,0,6,0" />
+                            <Button Style="{StaticResource SmallButton}" Content="ذخیره" Command="{Binding SaveRulesCommand}"
+                                    Background="{StaticResource AccentSoftBrush}" Foreground="{StaticResource AccentBrush}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="قوانین پردازه‌ها (پیشرفته)" Style="{StaticResource H2}" />
+                            <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,0"
+                                       Text="Preferred = P-Core یا CCD اصلی · PreferredNoSmt = همان بدون Hyper-Threading · Secondary = E-Core یا CCD دوم · Custom = ماسک هگز دلخواه (مثلاً 0xFF)" />
+                        </StackPanel>
+                    </DockPanel>
+                    <DataGrid ItemsSource="{Binding Rules}" Margin="0,12,0,0" RowHeight="40">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="فعال" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding Enabled, UpdateSourceTrigger=PropertyChanged}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="نام فایل" Width="2*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding ProcessName, UpdateSourceTrigger=PropertyChanged}" FlowDirection="LeftToRight" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="هسته‌ها" Width="1.4*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.AffinityModes, ElementName=Self}"
+                                                  SelectedItem="{Binding Affinity, UpdateSourceTrigger=PropertyChanged}" FlowDirection="LeftToRight" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="ماسک دلخواه" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding CustomMask, UpdateSourceTrigger=PropertyChanged}" FlowDirection="LeftToRight" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Priority" Width="1.2*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.PriorityLevels, ElementName=Self}"
+                                                  SelectedItem="{Binding Priority, UpdateSourceTrigger=PropertyChanged}" FlowDirection="LeftToRight" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="ضد EcoQoS" Width="90">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding DisableThrottling, UpdateSourceTrigger=PropertyChanged}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="بازی" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding IsGame, UpdateSourceTrigger=PropertyChanged}"
+                                                  ToolTip="اجرای این پردازه یعنی GameLoop باز است (تایمر و پاورپلن جلسه فعال می‌شود)" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Width="50">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Style="{StaticResource GhostButton}" Command="{Binding DataContext.RemoveRuleCommand, ElementName=Self}" CommandParameter="{Binding}"
+                                                ToolTip="حذف">
+                                            <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource DangerBrush}" />
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- Session -->
+            <Border Style="{StaticResource Card}" Margin="0,14,0,0">
+                <StackPanel>
+                    <TextBlock Text="تنظیمات جلسه بازی" Style="{StaticResource H2}" />
+                    <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,12" Text="فقط تا وقتی GameLoop باز است فعال می‌مانند و بعد از بستن آن خودکار برمی‌گردند." />
+                    <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding HighResTimer}" Margin="0,0,0,10">
+                        <TextBlock Text="تایمر دقیق ویندوز (0.5 ms) هنگام بازی" />
+                    </CheckBox>
+                    <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding SessionPowerPlan}">
+                        <TextBlock Text="سوییچ خودکار به پاورپلن Ultimate هنگام بازی و برگشت به پلن قبلی بعد از آن" />
+                    </CheckBox>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
