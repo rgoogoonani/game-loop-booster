@@ -14,6 +14,11 @@
                 <StackPanel>
                     <DockPanel>
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding JitterRealtime}" Margin="0,0,18,0"
+                                      IsEnabled="{Binding IsJitterRunning, Converter={StaticResource InvBool}}"
+                                      ToolTip="روشن: تست با اولویت Realtime اجرا می‌شود و فقط مکث‌های درایورها (DPC/ISR) را نشان می‌دهد. خاموش: تست با اولویت عادی اجرا می‌شود و مکث ناشی از شلوغی CPU (مثلاً خود بازی) هم دیده می‌شود.">
+                                <TextBlock Text="فقط درایورها (Realtime)" FontSize="12.5" />
+                            </CheckBox>
                             <TextBlock Text="مدت:" Style="{StaticResource Label}" VerticalAlignment="Center" Margin="0,0,8,0" />
                             <ComboBox Width="90" SelectedItem="{Binding JitterSeconds}" IsEnabled="{Binding IsJitterRunning, Converter={StaticResource InvBool}}" FlowDirection="LeftToRight">
                                 <ComboBox.ItemsSource>

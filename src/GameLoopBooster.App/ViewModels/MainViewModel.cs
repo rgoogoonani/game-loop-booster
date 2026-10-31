@@ -98,6 +98,7 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty] private double[] jitterValues = Array.Empty<double>();
     [ObservableProperty] private JitterResult? jitterResult;
     [ObservableProperty] private int jitterSeconds = 15;
+    [ObservableProperty] private bool jitterRealtime = true;
     [ObservableProperty] private double jitterProgress;
 
     public string CpuName => Hardware?.CpuName ?? "…";
@@ -499,8 +500,8 @@ public sealed partial class MainViewModel : ObservableObject
         });
         try
         {
-            Log.Info($"تست Jitter ({JitterSeconds} ثانیه) شروع شد");
-            var r = await JitterTest.RunAsync(TimeSpan.FromSeconds(JitterSeconds), progress, _jitterCts.Token);
+            Log.Info($"تست Jitter ({JitterSeconds} ثانیه، {(JitterRealtime ? "Realtime: فقط درایورها" : "اولویت عادی")}) شروع شد");
+            var r = await JitterTest.RunAsync(TimeSpan.FromSeconds(JitterSeconds), JitterRealtime, progress, _jitterCts.Token);
             JitterResult = r;
             JitterProgress = 100;
             Log.Info($"Jitter: پایه {r.BaselineMs:0.000}ms · p99 {r.P99Ms:0.000}ms · بدترین {r.MaxMs:0.000}ms · بالای 1ms: {r.StallsOver1ms} · بالای 4ms: {r.StallsOver4ms} → {r.Verdict}");
