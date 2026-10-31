@@ -495,7 +495,7 @@ public sealed partial class MainViewModel : ObservableObject
         {
             _jitterBuffer.AddRange(batch.Values);
             JitterProgress = Math.Min(100, batch.Fraction * 100);
-            JitterValues = _jitterBuffer.Count > 1200 ? _jitterBuffer.GetRange(_jitterBuffer.Count - 1200, 1200).ToArray() : _jitterBuffer.ToArray();
+            JitterValues = Overview(_jitterBuffer, 1200);
         });
         try
         {
@@ -513,6 +513,25 @@ public sealed partial class MainViewModel : ObservableObject
         {
             IsJitterRunning = false;
         }
+    }
+
+    /// <summary>
+    /// Squeezes the whole run into at most <paramref name="buckets"/> bars, keeping each bucket's worst value,
+    /// so the chart shows when in the test a stall happened instead of only the last second or two.
+    /// </summary>
+    private static double[] Overview(List<double> values, int buckets)
+    {
+        if (values.Count <= buckets) return values.ToArray();
+        var result = new double[buckets];
+        for (var i = 0; i < buckets; i++)
+        {
+            var from = (int)((long)i * values.Count / buckets);
+            var to = (int)((long)(i + 1) * values.Count / buckets);
+            var max = 0.0;
+            for (var j = from; j < to; j++) max = Math.Max(max, values[j]);
+            result[i] = max;
+        }
+        return result;
     }
 
     private void UpdateTimerText()
