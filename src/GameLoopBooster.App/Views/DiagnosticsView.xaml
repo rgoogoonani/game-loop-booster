@@ -42,7 +42,7 @@
                         <StackPanel>
                             <TextBlock Text="تست Jitter زمان‌بندی (DPC / Latency)" Style="{StaticResource H2}" />
                             <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,0"
-                                       Text="یک ترد با اولویت بالا هر 1ms بیدار می‌شود و تأخیر هر بیداری ثبت می‌شود. یک بار قبل و یک بار بعد از بهینه‌سازی (و ری‌استارت) اجرا کنید. اجرای تست وقتی GameLoop باز است نتیجه واقعی‌تری می‌دهد." />
+                                       Text="یک ترد با اولویت بالا هر 1ms بیدار می‌شود. تأخیر ثابتی که هر بیداری دارد (به‌خاطر تیک تایمر، حدود 0.5ms) «پایه» حساب می‌شود و فقط مقدار اضافه روی آن به‌عنوان Jitter نمایش داده می‌شود. یک بار قبل و یک بار بعد از بهینه‌سازی (و ری‌استارت) اجرا کنید. اجرای تست وقتی GameLoop باز است نتیجه واقعی‌تری می‌دهد." />
                         </StackPanel>
                     </DockPanel>
 
@@ -57,13 +57,13 @@
                     <UniformGrid Columns="5" Margin="-6,14,-6,0" Visibility="{Binding JitterResult, Converter={StaticResource BoolVis}}">
                         <Border Background="{StaticResource Surface2Brush}" CornerRadius="12" Padding="14" Margin="6">
                             <StackPanel>
-                                <TextBlock Text="میانگین تأخیر" Style="{StaticResource Label}" />
-                                <TextBlock Text="{Binding JitterResult.AvgMs, StringFormat={}{0:0.000} ms}" FontSize="18" FontWeight="Bold" Margin="0,6,0,0" FlowDirection="LeftToRight" HorizontalAlignment="Right" />
+                                <TextBlock Text="تأخیر پایه تایمر (عادی)" Style="{StaticResource Label}" />
+                                <TextBlock Text="{Binding JitterResult.BaselineMs, StringFormat={}{0:0.000} ms}" FontSize="18" FontWeight="Bold" Margin="0,6,0,0" FlowDirection="LeftToRight" HorizontalAlignment="Right" />
                             </StackPanel>
                         </Border>
                         <Border Background="{StaticResource Surface2Brush}" CornerRadius="12" Padding="14" Margin="6">
                             <StackPanel>
-                                <TextBlock Text="صدک ۹۹ (p99)" Style="{StaticResource Label}" />
+                                <TextBlock Text="Jitter صدک ۹۹ (p99)" Style="{StaticResource Label}" />
                                 <TextBlock Text="{Binding JitterResult.P99Ms, StringFormat={}{0:0.000} ms}" FontSize="18" FontWeight="Bold" Margin="0,6,0,0" FlowDirection="LeftToRight" HorizontalAlignment="Right" />
                             </StackPanel>
                         </Border>
@@ -75,9 +75,9 @@
                         </Border>
                         <Border Background="{StaticResource Surface2Brush}" CornerRadius="12" Padding="14" Margin="6">
                             <StackPanel>
-                                <TextBlock Text="پرش‌های بالای 0.5ms / 1ms" Style="{StaticResource Label}" />
+                                <TextBlock Text="مکث‌های بالای 1ms / 4ms" Style="{StaticResource Label}" />
                                 <TextBlock FontSize="18" FontWeight="Bold" Margin="0,6,0,0" FlowDirection="LeftToRight" HorizontalAlignment="Right">
-                                    <Run Text="{Binding JitterResult.SpikesOver500us, Mode=OneWay}" /><Run Text=" / " Foreground="{StaticResource MutedBrush}" /><Run Text="{Binding JitterResult.SpikesOver1ms, Mode=OneWay}" Foreground="{StaticResource DangerBrush}" />
+                                    <Run Text="{Binding JitterResult.StallsOver1ms, Mode=OneWay}" /><Run Text=" / " Foreground="{StaticResource MutedBrush}" /><Run Text="{Binding JitterResult.StallsOver4ms, Mode=OneWay}" Foreground="{StaticResource DangerBrush}" />
                                 </TextBlock>
                             </StackPanel>
                         </Border>

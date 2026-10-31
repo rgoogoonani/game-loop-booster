@@ -491,11 +491,10 @@ public sealed partial class MainViewModel : ObservableObject
         _jitterBuffer.Clear();
         JitterValues = Array.Empty<double>();
         _jitterCts = new CancellationTokenSource();
-        var total = JitterSeconds * 1000.0;
-        var progress = new Progress<double[]>(batch =>
+        var progress = new Progress<JitterBatch>(batch =>
         {
-            _jitterBuffer.AddRange(batch);
-            JitterProgress = Math.Min(100, _jitterBuffer.Count / total * 100);
+            _jitterBuffer.AddRange(batch.Values);
+            JitterProgress = Math.Min(100, batch.Fraction * 100);
             JitterValues = _jitterBuffer.Count > 1200 ? _jitterBuffer.GetRange(_jitterBuffer.Count - 1200, 1200).ToArray() : _jitterBuffer.ToArray();
         });
         try
@@ -504,7 +503,7 @@ public sealed partial class MainViewModel : ObservableObject
             var r = await JitterTest.RunAsync(TimeSpan.FromSeconds(JitterSeconds), progress, _jitterCts.Token);
             JitterResult = r;
             JitterProgress = 100;
-            Log.Info($"Jitter: میانگین {r.AvgMs:0.000}ms · p99 {r.P99Ms:0.000}ms · max {r.MaxMs:0.000}ms → {r.Verdict}");
+            Log.Info($"Jitter: پایه {r.BaselineMs:0.000}ms · p99 {r.P99Ms:0.000}ms · بدترین {r.MaxMs:0.000}ms · بالای 1ms: {r.StallsOver1ms} · بالای 4ms: {r.StallsOver4ms} → {r.Verdict}");
         }
         catch (Exception ex)
         {

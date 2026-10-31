@@ -4,7 +4,7 @@ using System.Windows.Media;
 
 namespace GameLoopBooster.App.Controls;
 
-/// <summary>Bar chart of timer wake-up lateness; bars over 0.5 ms / 1 ms turn amber / red.</summary>
+/// <summary>Bar chart of timer wake-up jitter; bars over 1 ms / 4 ms turn amber / red.</summary>
 public sealed class JitterChart : FrameworkElement
 {
     public static readonly DependencyProperty ValuesProperty = DependencyProperty.Register(
@@ -37,8 +37,8 @@ public sealed class JitterChart : FrameworkElement
         dc.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, w, h));
         var values = Values ?? Array.Empty<double>();
 
-        var max = Math.Max(1.5, values.Length == 0 ? 0 : values.Max() * 1.1);
-        foreach (var line in new[] { 0.5, 1.0, 2.0, 5.0, 10.0 }.Where(l => l < max))
+        var max = Math.Max(2.5, values.Length == 0 ? 0 : values.Max() * 1.1);
+        foreach (var line in new[] { 1.0, 2.0, 4.0, 10.0, 20.0 }.Where(l => l < max))
         {
             var y = h - line / max * h;
             dc.DrawLine(Grid, new Point(0, y), new Point(w, y));
@@ -53,7 +53,7 @@ public sealed class JitterChart : FrameworkElement
         {
             var v = values[i];
             var bh = Math.Max(1, v / max * h);
-            var brush = v > 1.0 ? Bad : v > 0.5 ? Warn : Ok;
+            var brush = v > 4.0 ? Bad : v > 1.0 ? Warn : Ok;
             dc.DrawRectangle(brush, null, new Rect(i * w / values.Length, h - bh, Math.Max(1, barW - 0.5), bh));
         }
     }
