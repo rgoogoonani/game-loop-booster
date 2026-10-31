@@ -1,0 +1,200 @@
+<UserControl x:Class="GameLoopBooster.App.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:GameLoopBooster.App.Controls">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,8,28,28">
+        <StackPanel>
+            <!-- Hero -->
+            <Border CornerRadius="20" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Background="{StaticResource SurfaceBrush}">
+                <Grid>
+                    <Border CornerRadius="20" Background="{StaticResource HeroGradient}" />
+                    <Grid Margin="28,26">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="سیستم شما شناسایی شد · پروفایل انتخاب‌شده" Style="{StaticResource Label}" Foreground="{StaticResource AccentBrush}" />
+                            <TextBlock Text="{Binding ProfileName}" Style="{StaticResource H1}" Margin="0,6,0,4" FlowDirection="LeftToRight" HorizontalAlignment="Right" />
+                            <TextBlock Text="{Binding CpuName}" FontSize="14" Foreground="{StaticResource MutedBrush}" FlowDirection="LeftToRight" HorizontalAlignment="Right" />
+                            <WrapPanel Margin="0,16,0,0">
+                                <Border Style="{StaticResource Chip}" Margin="0,0,8,8"><TextBlock Text="{Binding Topology}" FontSize="12" FlowDirection="LeftToRight" /></Border>
+                                <Border Style="{StaticResource Chip}" Margin="0,0,8,8"><TextBlock Text="{Binding RamText}" FontSize="12" FlowDirection="LeftToRight" /></Border>
+                                <Border Style="{StaticResource Chip}" Margin="0,0,8,8"><TextBlock Text="{Binding GpuText}" FontSize="12" FlowDirection="LeftToRight" /></Border>
+                                <Border Style="{StaticResource Chip}" Margin="0,0,8,8"><TextBlock Text="{Binding WindowsText}" FontSize="12" FlowDirection="LeftToRight" /></Border>
+                            </WrapPanel>
+                            <TextBlock Text="{Binding PreferredCoresText}" Style="{StaticResource Muted}" Margin="0,6,0,0" />
+                        </StackPanel>
+                        <Grid Grid.Column="1" Width="150" Height="150" Margin="24,0,0,0">
+                            <c:ScoreRing Value="{Binding Score}" Thickness="12" />
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock HorizontalAlignment="Center" FontSize="34" FontWeight="Bold" FlowDirection="LeftToRight">
+                                    <Run Text="{Binding Score, Mode=OneWay}" /><Run Text="%" FontSize="18" Foreground="{StaticResource MutedBrush}" />
+                                </TextBlock>
+                                <TextBlock HorizontalAlignment="Center" Style="{StaticResource Label}">
+                                    <Run Text="{Binding AppliedCount, Mode=OneWay}" /><Run Text=" از " /><Run Text="{Binding SelectedCount, Mode=OneWay}" /><Run Text=" فعال" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Reboot banner -->
+            <Border Margin="0,14,0,0" CornerRadius="12" Padding="16,12" Background="{StaticResource WarningSoftBrush}" BorderBrush="#55FFB020" BorderThickness="1"
+                    Visibility="{Binding RebootPending, Converter={StaticResource BoolVis}}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource WarningBrush}" VerticalAlignment="Center" FontSize="15" />
+                    <TextBlock Margin="10,0,0,0" Text="بعضی تنظیمات (تایمر، حافظه، MPO، Power Throttling) بعد از ری‌استارت ویندوز کامل اعمال می‌شوند." Foreground="{StaticResource WarningBrush}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <!-- One-click -->
+            <Border Style="{StaticResource Card}" Margin="0,14,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="بهینه‌سازی یک‌کلیکی" Style="{StaticResource H2}" />
+                        <TextBlock Text="قبل از هر تغییر، مقدار اصلی ذخیره می‌شود و با یک کلیک قابل برگشت است." Style="{StaticResource Muted}" Margin="0,4,0,14" />
+                        <StackPanel Orientation="Horizontal">
+                            <Border Background="{StaticResource Surface2Brush}" CornerRadius="11" Padding="3" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton Style="{StaticResource SegmentButton}" Content="پایه (امن)" GroupName="level"
+                                                 IsChecked="{Binding ProfileLevel, Converter={StaticResource EqBool}, ConverterParameter=Safe}" />
+                                    <RadioButton Style="{StaticResource SegmentButton}" Content="حداکثر" GroupName="level"
+                                                 IsChecked="{Binding ProfileLevel, Converter={StaticResource EqBool}, ConverterParameter=Aggressive}" />
+                                </StackPanel>
+                            </Border>
+                            <TextBlock Text="{Binding ProfileHint}" Style="{StaticResource Muted}" VerticalAlignment="Center" Margin="14,0,0,0" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Style="{StaticResource DangerButton}" Command="{Binding RestoreAllCommand}" Margin="0,0,10,0" Padding="18,14">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE777;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource DangerBrush}" VerticalAlignment="Center" />
+                                <TextBlock Text="بازگردانی همه" Margin="8,0,0,0" Foreground="{StaticResource DangerBrush}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource PrimaryButton}" Command="{Binding BoostCommand}" Padding="30,14" FontSize="15" Effect="{StaticResource GlowEffect}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE945;" FontFamily="Segoe MDL2 Assets" Foreground="#06121A" VerticalAlignment="Center" FontSize="16" />
+                                <TextBlock Text="بوست کن!" Margin="10,0,0,0" Foreground="#06121A" FontWeight="Bold" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Stat tiles -->
+            <UniformGrid Columns="4" Margin="-6,8,-6,0">
+                <Border Style="{StaticResource Card}" Margin="6">
+                    <StackPanel>
+                        <TextBlock Text="وضعیت GameLoop" Style="{StaticResource Label}" />
+                        <TextBlock Margin="0,8,0,0" FontSize="18" FontWeight="Bold">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="اجرا نشده" />
+                                    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding GameRunning}" Value="True">
+                                            <Setter Property="Text" Value="در حال اجرا ✓" />
+                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text="{Binding GameLoopText}" Style="{StaticResource Label}" Margin="0,6,0,0" TextTrimming="CharacterEllipsis" ToolTip="{Binding GameLoopText}" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Margin="6">
+                    <StackPanel>
+                        <TextBlock Text="دقت تایمر ویندوز" Style="{StaticResource Label}" />
+                        <TextBlock Text="{Binding TimerText}" Margin="0,8,0,0" FontSize="18" FontWeight="Bold" Foreground="{StaticResource AccentBrush}" FlowDirection="LeftToRight" HorizontalAlignment="Right" />
+                        <TextBlock Text="هنگام بازی: 0.5 ms" Style="{StaticResource Label}" Margin="0,6,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Margin="6">
+                    <StackPanel>
+                        <TextBlock Text="پردازه‌های تحت کنترل" Style="{StaticResource Label}" />
+                        <TextBlock Text="{Binding LiveProcesses.Count}" Margin="0,8,0,0" FontSize="18" FontWeight="Bold" Foreground="{StaticResource Accent2Brush}" />
+                        <TextBlock Text="Affinity · Priority · EcoQoS" Style="{StaticResource Label}" Margin="0,6,0,0" FlowDirection="LeftToRight" HorizontalAlignment="Right" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Margin="6">
+                    <StackPanel>
+                        <TextBlock Text="تنظیمات تغییر یافته" Style="{StaticResource Label}" />
+                        <TextBlock Text="{Binding BackupRows.Count}" Margin="0,8,0,0" FontSize="18" FontWeight="Bold" />
+                        <TextBlock Text="همه قابل بازگشت" Style="{StaticResource Label}" Margin="0,6,0,0" />
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <!-- Core map + checks -->
+            <Grid Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="2*" />
+                </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="نقشه هسته‌های CPU" Style="{StaticResource H2}" />
+                        <TextBlock Text="هسته‌های روشن (فیروزه‌ای) محل اجرای امولاتور هستند." Style="{StaticResource Muted}" Margin="0,4,0,12" />
+                        <ItemsControl ItemsSource="{Binding CoreChips}" FlowDirection="LeftToRight">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Width="62" Height="54" Margin="0,0,6,6" CornerRadius="10" BorderThickness="1" ToolTip="{Binding Kind}">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="{StaticResource Surface2Brush}" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Preferred}" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+                                                        <Setter Property="BorderBrush" Value="#8000E5FF" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Label}" HorizontalAlignment="Center" FontWeight="Bold" FontSize="13" />
+                                            <TextBlock Text="{Binding Threads}" HorizontalAlignment="Center" FontSize="10" Foreground="{StaticResource MutedBrush}" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource Card}">
+                    <StackPanel>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Command="{Binding NavigateCommand}" CommandParameter="diagnostics" Content="جزئیات ←" />
+                            <TextBlock Text="سلامت سیستم" Style="{StaticResource H2}" VerticalAlignment="Center" />
+                        </DockPanel>
+                        <ItemsControl ItemsSource="{Binding Checks}" Margin="0,8,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <DockPanel Margin="0,6">
+                                        <Ellipse DockPanel.Dock="Left" Width="8" Height="8" Fill="{Binding State, Converter={StaticResource StateBrush}}" VerticalAlignment="Center" />
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding Value}" Style="{StaticResource Label}" VerticalAlignment="Center" MaxWidth="190" TextTrimming="CharacterEllipsis" ToolTip="{Binding Value}" />
+                                        <TextBlock Text="{Binding Title}" Margin="10,0,8,0" VerticalAlignment="Center" FontSize="12.5" />
+                                    </DockPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

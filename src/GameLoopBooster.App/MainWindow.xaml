@@ -1,0 +1,157 @@
+<Window x:Class="GameLoopBooster.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:GameLoopBooster.App.Views"
+        Title="GameLoop Booster"
+        Width="1300" Height="840" MinWidth="1100" MinHeight="680"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None" ResizeMode="CanResize"
+        Background="{StaticResource BgBrush}"
+        FontFamily="{StaticResource AppFont}"
+        FontSize="13"
+        FlowDirection="RightToLeft"
+        Icon="pack://application:,,,/Assets/app.ico"
+        UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="44" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+
+    <Grid x:Name="Root">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="248" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ── Sidebar ─────────────────────────────────── -->
+        <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+            <DockPanel Margin="14,16,14,16">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="6,2,0,26">
+                    <Image Source="pack://application:,,,/Assets/logo.png" Width="38" Height="38" />
+                    <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="GameLoop Booster" FontWeight="Bold" FontSize="15.5" FlowDirection="LeftToRight" HorizontalAlignment="Left" />
+                        <TextBlock Text="ضد لگ و میکرو‌استاتر" Style="{StaticResource Label}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Bottom: live GameLoop status -->
+                <Border DockPanel.Dock="Bottom" Background="{StaticResource Surface2Brush}" CornerRadius="12" Padding="14,12">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="9" Height="9" Fill="{Binding GameRunning, Converter={StaticResource StateBrush}}" VerticalAlignment="Center">
+                                <Ellipse.Effect>
+                                    <DropShadowEffect Color="#22D3A0" BlurRadius="10" ShadowDepth="0" Opacity="0.8" />
+                                </Ellipse.Effect>
+                            </Ellipse>
+                            <TextBlock Margin="8,0,0,0" FontWeight="SemiBold" FontSize="12.5">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="GameLoop: در انتظار اجرا" />
+                                        <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding GameRunning}" Value="True">
+                                                <Setter Property="Text" Value="GameLoop: بهینه شده ✓" />
+                                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                        <CheckBox Style="{StaticResource Switch}" Margin="0,12,0,0" IsChecked="{Binding IsWatching}">
+                            <TextBlock Text="مانیتور خودکار" FontSize="12.5" />
+                        </CheckBox>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel>
+                    <RadioButton Style="{StaticResource NavButton}" Tag="&#xE80F;" Content="داشبورد" GroupName="nav"
+                                 IsChecked="{Binding CurrentPage, Converter={StaticResource EqBool}, ConverterParameter=dashboard}" />
+                    <RadioButton Style="{StaticResource NavButton}" Tag="&#xE945;" Content="بهینه‌سازی‌ها" GroupName="nav"
+                                 IsChecked="{Binding CurrentPage, Converter={StaticResource EqBool}, ConverterParameter=tweaks}" />
+                    <RadioButton Style="{StaticResource NavButton}" Tag="&#xE9F5;" Content="پردازه‌ها و هسته‌ها" GroupName="nav"
+                                 IsChecked="{Binding CurrentPage, Converter={StaticResource EqBool}, ConverterParameter=processes}" />
+                    <RadioButton Style="{StaticResource NavButton}" Tag="&#xE9D9;" Content="عیب‌یابی و تست" GroupName="nav"
+                                 IsChecked="{Binding CurrentPage, Converter={StaticResource EqBool}, ConverterParameter=diagnostics}" />
+                    <RadioButton Style="{StaticResource NavButton}" Tag="&#xE777;" Content="بکاپ و بازگردانی" GroupName="nav"
+                                 IsChecked="{Binding CurrentPage, Converter={StaticResource EqBool}, ConverterParameter=backup}" />
+                    <RadioButton Style="{StaticResource NavButton}" Tag="&#xE713;" Content="تنظیمات" GroupName="nav"
+                                 IsChecked="{Binding CurrentPage, Converter={StaticResource EqBool}, ConverterParameter=settings}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- ── Main area ───────────────────────────────── -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="44" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Title bar -->
+            <DockPanel Grid.Row="0">
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Margin="24,0,0,0" VerticalAlignment="Center">
+                    <Ellipse Width="7" Height="7" VerticalAlignment="Center">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="{StaticResource SuccessBrush}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                        <Setter Property="Fill" Value="{StaticResource WarningBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <TextBlock Text="{Binding StatusText}" Style="{StaticResource Label}" Margin="8,0,0,0" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" MaxWidth="700" />
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right" FlowDirection="LeftToRight">
+                    <Button Style="{StaticResource TitleBarButton}" Content="&#xE921;" Click="Minimize_Click" WindowChrome.IsHitTestVisibleInChrome="True" />
+                    <Button Style="{StaticResource TitleBarButton}" Content="&#xE922;" Click="Maximize_Click" WindowChrome.IsHitTestVisibleInChrome="True" />
+                    <Button Content="&#xE8BB;" Click="Close_Click" WindowChrome.IsHitTestVisibleInChrome="True">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource TitleBarButton}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Bd" Background="Transparent">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="#E81123" />
+                                                    <Setter Property="Foreground" Value="White" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+                <Border />
+            </DockPanel>
+
+            <!-- Pages -->
+            <Grid Grid.Row="1">
+                <views:DashboardView Visibility="{Binding CurrentPage, Converter={StaticResource EqVis}, ConverterParameter=dashboard}" />
+                <views:TweaksView Visibility="{Binding CurrentPage, Converter={StaticResource EqVis}, ConverterParameter=tweaks}" />
+                <views:ProcessesView Visibility="{Binding CurrentPage, Converter={StaticResource EqVis}, ConverterParameter=processes}" />
+                <views:DiagnosticsView Visibility="{Binding CurrentPage, Converter={StaticResource EqVis}, ConverterParameter=diagnostics}" />
+                <views:BackupView Visibility="{Binding CurrentPage, Converter={StaticResource EqVis}, ConverterParameter=backup}" />
+                <views:SettingsView Visibility="{Binding CurrentPage, Converter={StaticResource EqVis}, ConverterParameter=settings}" />
+
+                <!-- Loading overlay -->
+                <Border Background="{StaticResource BgBrush}" Visibility="{Binding IsLoading, Converter={StaticResource BoolVis}}">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <Image Source="pack://application:,,,/Assets/logo.png" Width="72" Height="72" Effect="{StaticResource GlowEffect}" />
+                        <TextBlock Text="در حال شناسایی سخت‌افزار سیستم…" Style="{StaticResource H2}" Margin="0,22,0,6" HorizontalAlignment="Center" />
+                        <TextBlock Text="CPU · هسته‌های P/E · رم · کارت گرافیک · GameLoop" Style="{StaticResource Label}" HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
